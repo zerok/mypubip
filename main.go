@@ -11,6 +11,11 @@ import (
 )
 
 func echoIPHandler(w http.ResponseWriter, r *http.Request) {
+	remoteIPs := r.Header.Values("X-Forwarded-For")
+	if len(remoteIPs) > 0 {
+		fmt.Fprint(w, remoteIPs[0])
+		return
+	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		http.Error(w, "Unexpected remote address", http.StatusBadRequest)
