@@ -11,17 +11,25 @@ import (
 )
 
 func echoIPHandler(w http.ResponseWriter, r *http.Request) {
+	remoteIP := ""
 	remoteIPs := r.Header.Values("X-Forwarded-For")
 	if len(remoteIPs) > 0 {
-		fmt.Fprint(w, remoteIPs[0])
+		remoteIP = remoteIPs[0]
+	}
+	if remoteIP == "" {
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			http.Error(w, "Unexpected remote address", http.StatusBadRequest)
+			return
+		}
+		remoteIP = host
+	}
+	ip := net.ParseIP(remoteIP)
+	if ip == nil {
+		http.Error(w, "Invalid IP", http.StatusBadRequest)
 		return
 	}
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		http.Error(w, "Unexpected remote address", http.StatusBadRequest)
-		return
-	}
-	fmt.Fprint(w, host)
+	fmt.Fprint(w, ip.String())
 }
 
 func main() {
