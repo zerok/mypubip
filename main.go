@@ -35,6 +35,10 @@ func echoIPHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Logger()
 	var addr string
+	pflag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of mypubip:\n")
+		pflag.PrintDefaults()
+	}
 	pflag.StringVar(&addr, "addr", "localhost:8000", "Address to listen on")
 	pflag.Parse()
 	srv := http.Server{}
